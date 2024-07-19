@@ -1,4 +1,4 @@
-# Enrollment data for a university detailing the program type of students 
+# Enrollment data for a university detailing the program type of students
 # and some information about them.
 # Dependent variable program type. General Academy Vocational
 # Predictors: ses (socioeconomic status), write (writing score),
@@ -9,10 +9,10 @@ library(dplyr)
 library(nnet)
 set.seed(7) # set seed for reproducibility
 # Generate a random sample of socioeconomic statuses (ses)
-ses <- sample( 
-  c("low", "middle", "high"),  # Categories to sample from
-  size = 10000L,               # Sample size of 10,000
-  replace = TRUE,              # Allow repetition in sampling
+ses <- sample(
+  c("low", "middle", "high"), # Categories to sample from
+  size = 10000L, # Sample size of 10,000
+  replace = TRUE, # Allow repetition in sampling
   prob = c(0.235, 0.475, 0.29) # Probability weights for each category
 )
 
@@ -82,7 +82,16 @@ head(P)
 all(round(apply(P, 1, sum)) == 1)
 
 # Simulate enrollment outcomes based on the probabilities
-y <- apply(P, MARGIN = 1, function(x) sample(x = c("academy", "general", "vocation"), size = 1, prob = x))
+y <- apply(P,
+  MARGIN = 1,
+  function(x) {
+    sample(
+      x = c("academy", "general", "vocation"),
+      size = 1,
+      prob = x
+    )
+  }
+)
 
 # Convert the outcome variable to a factor with specified levels
 y <- factor(y, levels = c("academy", "general", "vocation"))
@@ -107,6 +116,7 @@ car::Anova(m)
 
 # Odds ratio
 exp(coef(m))
+
 # Plot how the variables affect the probability of being in a category
 library(effects)
 plot(allEffects(m))
@@ -114,3 +124,6 @@ plot(allEffects(m))
 newdata <- data.frame(ses = "low", write = 30, schtyp = "public") # Expect vocation
 predict(m, newdata = newdata, "probs")
 predict(m, newdata)
+
+pred_acc <- table(enrollment$prog, predict(m, enrollment[2:4]))
+caret::confusionMatrix(pred_acc)
